@@ -70,10 +70,12 @@ The first run performs a local bootstrap when `io.exe` is not already available:
 
 ```text
 1. Clone Io tag 2026.04.20-native-final into .tools/.
-2. Configure a Release build with CMake.
-3. Build the static Io interpreter.
-4. Copy it to .tools/bin/io.exe.
-5. Execute tests/core_test.io.
+2. Verify commit e5024305c07a7c05d41c0200901678fb0789e029.
+3. Apply local Windows/modern-GCC compatibility adjustments.
+4. Configure a Release build with CMake.
+5. Build the static Io interpreter.
+6. Copy it to .tools/bin/io.exe.
+7. Execute tests/core_test.io.
 ```
 
 Required host commands:
@@ -88,6 +90,12 @@ MinGW-W64 is preferred when `mingw32-make` is available. Ninja is used when
 available. Otherwise CMake selects the installed default toolchain, such as
 Visual Studio Build Tools.
 
+The pinned native Io source currently includes `<execinfo.h>` unconditionally
+and predates GCC's promotion of several C pointer diagnostics to errors. On
+MinGW, the bootstrap guards that unused Unix header and downgrades only those
+compatibility diagnostics to warnings. These changes exist only under ignored
+`.tools/`; CINDER-16 source and the upstream repository are not modified.
+
 The bootstrap does not install system packages, modify PATH, or use a remote
 runner. Generated source and binaries remain under the ignored `.tools/`
 directory.
@@ -98,9 +106,9 @@ Force a clean runtime rebuild:
 powershell -ExecutionPolicy Bypass -File tools/test.ps1 -RebuildRuntime
 ```
 
-A missing compiler or CMake is classified as a toolchain failure. A CINDER-16
-test result exists only after `tests/core_test.io` executes and returns an exit
-code.
+A missing compiler, incompatible runtime build, or CMake failure is classified
+as a toolchain failure. A CINDER-16 test result exists only after
+`tests/core_test.io` executes and returns an exit code.
 
 LAYOUT
 ------
