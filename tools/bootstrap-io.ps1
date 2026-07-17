@@ -120,6 +120,38 @@ Replace-TextOnce `
     -Replacement $ExecInfoGuard `
     -Label "guard execinfo.h on Windows"
 
+$StateSource = Join-Path $SourceRoot "libs\iovm\source\IoState.c"
+$ProtoLookupNeedle = @'
+IoObject *IoState_protoWithId_(IoState *self, const char *v) {
+    IoObject *proto = PointerHash_at_(self->primitives, (void *)v);
+
+    // printf("IoState_protoWithId_(self, %s)\n", v);
+
+    if (!proto) {
+'@
+$ProtoLookupReplacement = @'
+IoObject *IoState_protoWithId_(IoState *self, const char *v) {
+    IoObject *proto = PointerHash_at_(self->primitives, (void *)v);
+
+    // PointerHash compares key addresses. Identical proto id literals from
+    // different translation units are not guaranteed to share an address.
+    // Preserve the fast path, then fall back to content comparison.
+    if (!proto) {
+        POINTERHASH_FOREACH(
+            self->primitives, key, candidate,
+            if (key && strcmp((const char *)key, v) == 0) {
+                proto = candidate;
+            });
+    }
+
+    if (!proto) {
+'@
+Replace-TextOnce `
+    -Path $StateSource `
+    -Needle $ProtoLookupNeedle `
+    -Replacement $ProtoLookupReplacement `
+    -Label "compare proto ids by content after pointer miss"
+
 $GeneratorArguments = @()
 $ConfigureArguments = @("-DCMAKE_BUILD_TYPE=Release")
 
