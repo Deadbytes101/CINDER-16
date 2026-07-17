@@ -55,26 +55,38 @@ CURRENT SLICE
 - Exact reverse-step restoration.
 - Core self-tests.
 
-RUN
----
+TEST
+----
 
-A working Io interpreter is required.
+The current Io upstream runtime is WASI-based. GitHub Actions builds a pinned Io
+commit with wasi-sdk 24.0 and runs it under Wasmtime 27.0.0. This is the
+authoritative bootstrap test gate.
+
+A native Io interpreter may run the suite directly:
 
 ```text
 io tests/core_test.io
 ```
 
-The test process exits non-zero on the first failed assertion.
+A built Io WASI runtime may run it from the repository root:
+
+```text
+wasmtime --dir=. path/to/io_static tests/core_test.io
+```
+
+The test process exits non-zero on the first failed assertion. A missing `io`
+command is a missing runtime, not a CINDER-16 test result.
 
 LAYOUT
 ------
 
 ```text
-docs/ISA.md              Machine contract.
-docs/ARCHITECTURE.md     State and reversibility design.
-src/Cinder16.io          Machine implementation.
-tests/core_test.io       Executable core tests.
-LICENSE                  GNU GPL version 2.
+.github/workflows/core.yml  Pinned Io/WASI execution gate.
+docs/ISA.md                 Machine contract.
+docs/ARCHITECTURE.md        State and reversibility design.
+src/Cinder16.io             Machine implementation.
+tests/core_test.io          Executable core tests.
+LICENSE                     GNU GPL version 2.
 ```
 
 NON-GOALS
