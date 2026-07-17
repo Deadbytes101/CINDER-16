@@ -55,38 +55,64 @@ CURRENT SLICE
 - Exact reverse-step restoration.
 - Core self-tests.
 
-TEST
-----
+LOCAL TEST
+----------
 
-The current Io upstream runtime is WASI-based. GitHub Actions builds a pinned Io
-commit with wasi-sdk 24.0 and runs it under Wasmtime 27.0.0. This is the
-authoritative bootstrap test gate.
+CINDER-16 does not require GitHub Actions.
 
-A native Io interpreter may run the suite directly:
+Run this from the repository root in PowerShell:
 
 ```text
-io tests/core_test.io
+powershell -ExecutionPolicy Bypass -File tools/test.ps1
 ```
 
-A built Io WASI runtime may run it from the repository root:
+The first run performs a local bootstrap when `io.exe` is not already available:
 
 ```text
-wasmtime --dir=. path/to/io_static tests/core_test.io
+1. Clone Io tag 2026.04.20-native-final into .tools/.
+2. Configure a Release build with CMake.
+3. Build the static Io interpreter.
+4. Copy it to .tools/bin/io.exe.
+5. Execute tests/core_test.io.
 ```
 
-The test process exits non-zero on the first failed assertion. A missing `io`
-command is a missing runtime, not a CINDER-16 test result.
+Required host commands:
+
+```text
+git
+cmake
+C compiler toolchain
+```
+
+MinGW-W64 is preferred when `mingw32-make` is available. Ninja is used when
+available. Otherwise CMake selects the installed default toolchain, such as
+Visual Studio Build Tools.
+
+The bootstrap does not install system packages, modify PATH, or use a remote
+runner. Generated source and binaries remain under the ignored `.tools/`
+directory.
+
+Force a clean runtime rebuild:
+
+```text
+powershell -ExecutionPolicy Bypass -File tools/test.ps1 -RebuildRuntime
+```
+
+A missing compiler or CMake is classified as a toolchain failure. A CINDER-16
+test result exists only after `tests/core_test.io` executes and returns an exit
+code.
 
 LAYOUT
 ------
 
 ```text
-.github/workflows/core.yml  Pinned Io/WASI execution gate.
-docs/ISA.md                 Machine contract.
-docs/ARCHITECTURE.md        State and reversibility design.
-src/Cinder16.io             Machine implementation.
-tests/core_test.io          Executable core tests.
-LICENSE                     GNU GPL version 2.
+docs/ISA.md              Machine contract.
+docs/ARCHITECTURE.md     State and reversibility design.
+src/Cinder16.io          Machine implementation.
+tests/core_test.io       Executable core tests.
+tools/bootstrap-io.ps1   Pinned local Io build.
+tools/test.ps1           Local test entry point.
+LICENSE                  GNU GPL version 2.
 ```
 
 NON-GOALS
