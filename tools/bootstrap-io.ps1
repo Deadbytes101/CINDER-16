@@ -61,11 +61,6 @@ if ($Force) {
     Remove-Item -Force $IoExe -ErrorAction SilentlyContinue
 }
 
-if (Test-Path $IoExe) {
-    Write-Host "IO RUNTIME READY: $IoExe"
-    exit 0
-}
-
 $null = Require-Command "git"
 $null = Require-Command "cmake"
 
