@@ -1,0 +1,75 @@
+name: core
+
+on:
+  push:
+    branches:
+      - main
+      - agent/bootstrap-v0.1
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  io-wasi:
+    name: Io WASI core tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      IO_COMMIT: ba6eb5fff4e31c37b0d450d4bc2e720b7171b73b
+      WASI_SDK_VERSION: "24"
+      WASI_SDK_FULL: "24.0"
+      WASMTIME_VERSION: "v27.0.0"
+
+    steps:
+      - name: Checkout CINDER-16
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned Io
+        uses: actions/checkout@v4
+        with:
+          repository: IoLanguage/io
+          ref: ${{ env.IO_COMMIT }}
+          path: .tools/io
+          submodules: recursive
+
+      - name: Install wasi-sdk
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/wasi-sdk"
+          curl --fail --location --silent --show-error \
+            --output /tmp/wasi-sdk.tar.gz \
+            "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_SDK_VERSION}/wasi-sdk-${WASI_SDK_FULL}-x86_64-linux.tar.gz"
+          tar -xzf /tmp/wasi-sdk.tar.gz \
+            -C "$HOME/wasi-sdk" \
+            --strip-components=1
+          "$HOME/wasi-sdk/bin/clang" --version
+
+      - name: Install wasmtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/wasmtime"
+          curl --fail --location --silent --show-error \
+            --output /tmp/wasmtime.tar.xz \
+            "https://github.com/bytecodealliance/wasmtime/releases/download/${WASMTIME_VERSION}/wasmtime-${WASMTIME_VERSION}-x86_64-linux.tar.xz"
+          tar -xJf /tmp/wasmtime.tar.xz \
+            -C "$HOME/wasmtime" \
+            --strip-components=1
+          echo "$HOME/wasmtime" >> "$GITHUB_PATH"
+          "$HOME/wasmtime/wasmtime" --version
+
+      - name: Build pinned Io
+        shell: bash
+        working-directory: .tools/io
+        run: make -j"$(nproc)"
+
+      - name: Run CINDER-16 core tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          wasmtime --dir=. .tools/io/build/bin/io_static tests/core_test.io
