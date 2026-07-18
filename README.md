@@ -111,8 +111,6 @@ VERIFICATION
 LOCAL TEST
 ----------
 
-CINDER-16 does not require GitHub Actions.
-
 Run from the repository root:
 
 ```text
