@@ -6,19 +6,22 @@ A SMALL 16-BIT MACHINE WITH AN HONEST DEBUGGER.
 STATUS
 ------
 
-v0.1 implementation candidate is complete on the working branch and awaits
-observed local execution of the full test suite.
-
-The merged machine core has already produced an observed Windows / MinGW result:
+CINDER-16 v0.1 is complete and has an observed local pass on Windows / MinGW
+GCC 16.1.0 using the pinned native Io runtime.
 
 ```text
 PASS: 27 assertions
-CINDER-16 CORE TESTS PASSED
+PASS: tests/core_test.io
+PASS: 85 assertions
+PASS: tests/v0_1_test.io
+PASS: 8 assertions
+PASS: tests/policy_test.io
+CINDER-16 V0.1 TEST SUITE PASSED
 ```
 
-That result proves the core slice only. Loader, debugger, conformance, trace-hash,
-and full-state reverse tests are not called passing until the expanded suite
-returns exit code zero from real Io processes.
+The three Io processes returned exit code zero. This verifies the machine core,
+strict loader, debugger, opcode conformance, trace determinism, policy boundaries,
+and exact forward/reverse restoration.
 
 CINDER-16 is a clean-room 16-bit virtual machine written in Io. It has fixed
 16-bit instructions, eight writable registers, 65,536 word-addressed memory
