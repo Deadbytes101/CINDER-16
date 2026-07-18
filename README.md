@@ -17,8 +17,8 @@ CINDER-16 CORE TESTS PASSED
 ```
 
 That result proves the core slice only. Loader, debugger, conformance, trace-hash,
-and full-state reverse tests are not called passing until `tests/v0_1_test.io`
-returns exit code zero on a real Io process.
+and full-state reverse tests are not called passing until the expanded suite
+returns exit code zero from real Io processes.
 
 CINDER-16 is a clean-room 16-bit virtual machine written in Io. It has fixed
 16-bit instructions, eight writable registers, 65,536 word-addressed memory
@@ -52,6 +52,7 @@ VERIFICATION
     invalid image atomicity
     deterministic repeated-run trace hash
     exact full-memory forward/reverse restoration
+    explicit no-DIV and no-hidden-stack policy tests
 ```
 
 LOCAL TEST
@@ -65,11 +66,12 @@ Run from the repository root:
 powershell -ExecutionPolicy Bypass -File tools/test.ps1
 ```
 
-The runner executes two independent Io processes:
+The runner executes three independent Io processes:
 
 ```text
 tests/core_test.io
 tests/v0_1_test.io
+tests/policy_test.io
 ```
 
 The first run performs a local runtime bootstrap when `io.exe` is unavailable:
@@ -144,6 +146,7 @@ src/Loader.io            Strict transactional image loader.
 src/Debugger.io          Disassembler, debugger, trace hash, snapshot.
 tests/core_test.io       Core regression tests.
 tests/v0_1_test.io       Loader/debugger/conformance verification.
+tests/policy_test.io     Division and stack boundary policy verification.
 tools/debug.io           Local debugger REPL.
 tools/bootstrap-io.ps1   Pinned local Io build.
 tools/test.ps1           Complete local verification entry point.
