@@ -6,76 +6,87 @@ A SMALL 16-BIT MACHINE WITH AN HONEST DEBUGGER.
 STATUS
 ------
 
-v0.1 bootstrap is under active construction.
+CINDER-16 v0.1 is complete and has an observed local pass on Windows / MinGW
+GCC 16.1.0 using the pinned native Io runtime.
 
-CINDER-16 is a clean-room 16-bit virtual machine written in Io. The machine is
-small by design: fixed-width instructions, eight general-purpose registers,
-64K words of memory, deterministic cycle accounting, and an execution trace
-that can restore the exact prior architectural state.
-
-The first milestone is not a GUI and not a fantasy operating system. It is a
-machine core whose behavior can be specified, observed, reversed, and tested.
-
-ARCHITECTURE
-------------
-
-```mermaid
-flowchart LR
-    IMAGE["PROGRAM WORDS"] --> LOAD["STRICT LOADER"]
-    LOAD --> MEM["64K x 16-bit MEMORY"]
-
-    MEM --> FETCH["FETCH"]
-    FETCH --> DECODE["DECODE"]
-    DECODE --> EXEC["EXECUTE"]
-
-    EXEC --> REGS["R0..R7"]
-    EXEC --> MEM
-    EXEC --> PC["PC / CYCLES / HALT"]
-
-    REGS --> DELTA["STATE DELTA"]
-    MEM --> DELTA
-    PC --> DELTA
-
-    DELTA --> TRACE["DETERMINISTIC TRACE"]
-    TRACE --> BACK["REVERSE STEP"]
-    TRACE --> TEST["CONFORMANCE TESTS"]
+```text
+PASS: 27 assertions
+PASS: tests/core_test.io
+PASS: 85 assertions
+PASS: tests/v0_1_test.io
+PASS: 8 assertions
+PASS: tests/policy_test.io
+CINDER-16 V0.1 TEST SUITE PASSED
 ```
 
-CURRENT SLICE
--------------
+The three Io processes returned exit code zero. This verifies the machine core,
+strict loader, debugger, opcode conformance, trace determinism, policy boundaries,
+and exact forward/reverse restoration.
 
-- Custom CINDER-16 ISA specification.
-- 16-bit wrapping arithmetic.
-- 65,536-word checked memory.
-- Eight writable 16-bit registers.
-- Deterministic program counter and cycle counter.
-- NOP, LDI, MOV, ADD, SUB, LD, ST, JMP, JZ, AND, OR, XOR, SHL, SHR, HALT.
-- Invalid opcode trap.
-- Per-instruction register and memory deltas.
-- Exact reverse-step restoration.
-- Core self-tests.
+CINDER-16 is a clean-room 16-bit virtual machine written in Io. It has fixed
+16-bit instructions, eight writable registers, 65,536 word-addressed memory
+locations, deterministic cycle accounting, strict image loading, and reversible
+instruction deltas.
+
+V0.1 SURFACE
+------------
+
+```text
+CPU
+    16-bit wrapping register and memory writes
+    65,536-word checked address space
+    deterministic PC, cycle, HALT, and trace state
+    15 valid opcodes and one atomic invalid-opcode trap
+
+LOADER
+    raw binary images
+    mandatory big/little byte order
+    four-digit hexadecimal text images
+    full-image validation before memory mutation
+    no truncation and no wrapped destination ranges
+
+DEBUGGER
+    run   step   back   regs   mem   disasm
+    break watch  reset  load   trace
+
+VERIFICATION
+    one vector per opcode
+    0x0000 / 0x7fff / 0x8000 / 0xffff boundaries
+    invalid image atomicity
+    deterministic repeated-run trace hash
+    exact full-memory forward/reverse restoration
+    explicit no-DIV and no-hidden-stack policy tests
+```
 
 LOCAL TEST
 ----------
 
 CINDER-16 does not require GitHub Actions.
 
-Run this from the repository root in PowerShell:
+Run from the repository root:
 
 ```text
 powershell -ExecutionPolicy Bypass -File tools/test.ps1
 ```
 
-The first run performs a local bootstrap when `io.exe` is not already available:
+The runner executes three independent Io processes:
+
+```text
+tests/core_test.io
+tests/v0_1_test.io
+tests/policy_test.io
+```
+
+The first run performs a local runtime bootstrap when `io.exe` is unavailable:
 
 ```text
 1. Clone Io tag 2026.04.20-native-final into .tools/.
 2. Verify commit e5024305c07a7c05d41c0200901678fb0789e029.
-3. Apply local Windows/modern-GCC compatibility adjustments.
+3. Apply local Windows / modern-GCC compatibility adjustments.
 4. Configure a Release build with CMake.
 5. Build the static Io interpreter.
 6. Copy it to .tools/bin/io.exe.
-7. Execute tests/core_test.io.
+7. Execute every committed test file listed by tools/test.ps1.
 ```
 
 Required host commands:
@@ -86,19 +97,11 @@ cmake
 C compiler toolchain
 ```
 
-MinGW-W64 is preferred when `mingw32-make` is available. Ninja is used when
-available. Otherwise CMake selects the installed default toolchain, such as
-Visual Studio Build Tools.
+MinGW-W64 is preferred when `mingw32-make` exists. Ninja is used when available.
+Otherwise CMake selects the installed default toolchain.
 
-The pinned native Io source currently includes `<execinfo.h>` unconditionally
-and predates GCC's promotion of several C pointer diagnostics to errors. On
-MinGW, the bootstrap guards that unused Unix header and downgrades only those
-compatibility diagnostics to warnings. These changes exist only under ignored
-`.tools/`; CINDER-16 source and the upstream repository are not modified.
-
-The bootstrap does not install system packages, modify PATH, or use a remote
-runner. Generated source and binaries remain under the ignored `.tools/`
-directory.
+The bootstrap does not install packages, modify PATH, alter project source, or
+use a remote runner. Generated source and binaries stay under ignored `.tools/`.
 
 Force a clean runtime rebuild:
 
@@ -106,22 +109,59 @@ Force a clean runtime rebuild:
 powershell -ExecutionPolicy Bypass -File tools/test.ps1 -RebuildRuntime
 ```
 
-A missing compiler, incompatible runtime build, or CMake failure is classified
-as a toolchain failure. A CINDER-16 test result exists only after
-`tests/core_test.io` executes and returns an exit code.
+DEBUGGER
+--------
+
+After the runtime exists:
+
+```text
+.tools/bin/io.exe tools/debug.io
+```
+
+Inside the shell:
+
+```text
+help
+load hex program.hex
+load raw program.bin big
+regs
+disasm 0 8
+break 4
+watch 100
+run 1000
+trace 16
+back
+```
+
+Image and debugger contracts are defined in `docs/LOADER.md` and
+`docs/DEBUGGER.md`.
 
 LAYOUT
 ------
 
 ```text
-docs/ISA.md              Machine contract.
+docs/ISA.md              Machine instruction contract.
 docs/ARCHITECTURE.md     State and reversibility design.
-src/Cinder16.io          Machine implementation.
-tests/core_test.io       Executable core tests.
+docs/LOADER.md           Raw and hexadecimal image contract.
+docs/DEBUGGER.md         Command and stop-condition contract.
+src/Cinder16.io          Machine core.
+src/Loader.io            Strict transactional image loader.
+src/Debugger.io          Disassembler, debugger, trace hash, snapshot.
+tests/core_test.io       Core regression tests.
+tests/v0_1_test.io       Loader/debugger/conformance verification.
+tests/policy_test.io     Division and stack boundary policy verification.
+tools/debug.io           Local debugger REPL.
 tools/bootstrap-io.ps1   Pinned local Io build.
-tools/test.ps1           Local test entry point.
+tools/test.ps1           Complete local verification entry point.
 LICENSE                  GNU GPL version 2.
 ```
+
+DEFINED ABSENCES
+----------------
+
+CINDER-16 v0.1 has no division opcode and no architectural stack. Divide-by-zero
+is not representable. Software stacks use ordinary checked memory. See
+`docs/ISA.md`.
 
 NON-GOALS
 ---------

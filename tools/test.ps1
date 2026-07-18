@@ -9,7 +9,11 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $LocalIo = Join-Path $RepoRoot ".tools\bin\io.exe"
 $Bootstrap = Join-Path $PSScriptRoot "bootstrap-io.ps1"
-$TestFile = Join-Path $RepoRoot "tests\core_test.io"
+$TestFiles = @(
+    "tests\core_test.io",
+    "tests\v0_1_test.io",
+    "tests\policy_test.io"
+)
 
 $Runtime = Get-Command "io" -CommandType Application -ErrorAction SilentlyContinue |
     Select-Object -First 1
@@ -39,18 +43,24 @@ else {
 
 Push-Location $RepoRoot
 try {
-    Write-Host "EXECUTE: tests/core_test.io"
-    & $IoExe $TestFile
-    $TestExitCode = $LASTEXITCODE
+    foreach ($RelativeTestFile in $TestFiles) {
+        $TestFile = Join-Path $RepoRoot $RelativeTestFile
+        $DisplayPath = $RelativeTestFile.Replace("\", "/")
+        Write-Host "EXECUTE: $DisplayPath"
+        & $IoExe $TestFile
+        $TestExitCode = $LASTEXITCODE
+
+        if ($TestExitCode -ne 0) {
+            Write-Error "$DisplayPath failed with exit code $TestExitCode"
+            exit $TestExitCode
+        }
+
+        Write-Host "PASS: $DisplayPath"
+    }
 }
 finally {
     Pop-Location
 }
 
-if ($TestExitCode -ne 0) {
-    Write-Error "CINDER-16 core tests failed with exit code $TestExitCode"
-    exit $TestExitCode
-}
-
-Write-Host "CINDER-16 CORE TESTS PASSED"
+Write-Host "CINDER-16 V0.1 TEST SUITE PASSED"
 exit 0
