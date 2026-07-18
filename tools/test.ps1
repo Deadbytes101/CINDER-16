@@ -11,7 +11,8 @@ $LocalIo = Join-Path $RepoRoot ".tools\bin\io.exe"
 $Bootstrap = Join-Path $PSScriptRoot "bootstrap-io.ps1"
 $TestFiles = @(
     "tests\core_test.io",
-    "tests\v0_1_test.io"
+    "tests\v0_1_test.io",
+    "tests\policy_test.io"
 )
 
 $Runtime = Get-Command "io" -CommandType Application -ErrorAction SilentlyContinue |
