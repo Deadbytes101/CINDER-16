@@ -46,6 +46,38 @@ After the runtime exists:
 
 Release details are recorded in `RELEASE_NOTES.md`, `CHANGELOG.md`, and `VERSION`.
 
+DOCUMENTATION PATH
+------------------
+
+Start at the level you need:
+
+```text
+USE THE RELEASE
+    README.md
+    RELEASE_NOTES.md
+
+WRITE MACHINE PROGRAMS
+    docs/PROGRAMMING.md
+    docs/ISA.md
+    docs/LOADER.md
+
+UNDERSTAND THE MACHINE
+    docs/DEEP_DIVE.md
+    docs/ARCHITECTURE.md
+
+UNDERSTAND REVERSAL
+    docs/TRACE_REVERSAL.md
+    docs/DEBUGGER.md
+
+CHANGE THE PROJECT
+    CONTRIBUTING.md
+```
+
+`docs/DEEP_DIVE.md` follows the complete path from image bytes to committed
+instruction delta and inverse apply. `docs/PROGRAMMING.md` contains manually
+encoded programs and debugger sessions. `docs/TRACE_REVERSAL.md` documents the
+exact delta, hash, snapshot, and reversal contracts.
+
 V0.1.0 SURFACE
 --------------
 
@@ -158,23 +190,27 @@ LAYOUT
 ------
 
 ```text
-VERSION                  Release version marker.
-CHANGELOG.md             Version history.
-RELEASE_NOTES.md         v0.1.0 usage and release scope.
-docs/ISA.md              Machine instruction contract.
-docs/ARCHITECTURE.md     State and reversibility design.
-docs/LOADER.md           Raw and hexadecimal image contract.
-docs/DEBUGGER.md         Command and stop-condition contract.
-src/Cinder16.io          Machine core.
-src/Loader.io            Strict transactional image loader.
-src/Debugger.io          Disassembler, debugger, trace hash, snapshot.
-tests/core_test.io       Core regression tests.
-tests/v0_1_test.io       Loader/debugger/conformance verification.
-tests/policy_test.io     Division and stack boundary policy verification.
-tools/debug.io           Local debugger REPL.
-tools/bootstrap-io.ps1   Pinned local Io build.
-tools/test.ps1           Complete local verification entry point.
-LICENSE                  GNU GPL version 2.
+VERSION                    Release version marker.
+CHANGELOG.md               Version history.
+RELEASE_NOTES.md           v0.1.0 usage and release scope.
+CONTRIBUTING.md            Evidence-first change discipline.
+docs/ISA.md                Machine instruction contract.
+docs/ARCHITECTURE.md       State and reversibility design.
+docs/LOADER.md             Raw and hexadecimal image contract.
+docs/DEBUGGER.md           Command and stop-condition contract.
+docs/DEEP_DIVE.md          Complete machine lifecycle.
+docs/PROGRAMMING.md        Encoding and program examples.
+docs/TRACE_REVERSAL.md     Delta, inverse, hash, and snapshot details.
+src/Cinder16.io            Machine core.
+src/Loader.io              Strict transactional image loader.
+src/Debugger.io            Disassembler, debugger, trace hash, snapshot.
+tests/core_test.io         Core regression tests.
+tests/v0_1_test.io         Loader/debugger/conformance verification.
+tests/policy_test.io       Division and stack boundary policy verification.
+tools/debug.io             Local debugger REPL.
+tools/bootstrap-io.ps1     Pinned local Io build.
+tools/test.ps1             Complete local verification entry point.
+LICENSE                    GNU GPL version 2.
 ```
 
 DEFINED ABSENCES
