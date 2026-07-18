@@ -6,8 +6,9 @@ A SMALL 16-BIT MACHINE WITH AN HONEST DEBUGGER.
 STATUS
 ------
 
-CINDER-16 v0.1 is complete and has an observed local pass on Windows / MinGW
-GCC 16.1.0 using the pinned native Io runtime.
+CINDER-16 v0.1.0 is the first public source release.
+
+Observed on Windows / MinGW GCC 16.1.0 using the pinned native Io runtime:
 
 ```text
 PASS: 27 assertions
@@ -28,8 +29,25 @@ CINDER-16 is a clean-room 16-bit virtual machine written in Io. It has fixed
 locations, deterministic cycle accounting, strict image loading, and reversible
 instruction deltas.
 
-V0.1 SURFACE
-------------
+GET STARTED
+-----------
+
+```text
+git clone https://github.com/Deadbytes101/CINDER-16.git
+cd CINDER-16
+powershell -ExecutionPolicy Bypass -File tools/test.ps1
+```
+
+After the runtime exists:
+
+```text
+.tools/bin/io.exe tools/debug.io
+```
+
+Release details are recorded in `RELEASE_NOTES.md`, `CHANGELOG.md`, and `VERSION`.
+
+V0.1.0 SURFACE
+--------------
 
 ```text
 CPU
@@ -112,7 +130,7 @@ powershell -ExecutionPolicy Bypass -File tools/test.ps1 -RebuildRuntime
 DEBUGGER
 --------
 
-After the runtime exists:
+Start the local debugger:
 
 ```text
 .tools/bin/io.exe tools/debug.io
@@ -140,6 +158,9 @@ LAYOUT
 ------
 
 ```text
+VERSION                  Release version marker.
+CHANGELOG.md             Version history.
+RELEASE_NOTES.md         v0.1.0 usage and release scope.
 docs/ISA.md              Machine instruction contract.
 docs/ARCHITECTURE.md     State and reversibility design.
 docs/LOADER.md           Raw and hexadecimal image contract.
@@ -159,9 +180,9 @@ LICENSE                  GNU GPL version 2.
 DEFINED ABSENCES
 ----------------
 
-CINDER-16 v0.1 has no division opcode and no architectural stack. Divide-by-zero
-is not representable. Software stacks use ordinary checked memory. See
-`docs/ISA.md`.
+CINDER-16 v0.1.0 has no division opcode and no architectural stack.
+Divide-by-zero is not representable. Software stacks use ordinary checked
+memory. See `docs/ISA.md`.
 
 NON-GOALS
 ---------
