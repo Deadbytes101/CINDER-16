@@ -169,6 +169,16 @@ RUNTIME EVIDENCE
 
 A committed test file is a claim, not runtime evidence.
 
-The merged core has an observed `PASS: 27 assertions` result. The expanded v0.1
-candidate remains UNVERIFIED until `tools/test.ps1` executes both test files and
-the real Io processes return exit code zero.
+Observed locally on Windows / MinGW GCC 16.1.0 with the pinned native Io runtime:
+
+```text
+PASS: 27 assertions
+PASS: tests/core_test.io
+PASS: 85 assertions
+PASS: tests/v0_1_test.io
+PASS: 8 assertions
+PASS: tests/policy_test.io
+CINDER-16 V0.1 TEST SUITE PASSED
+```
+
+All three Io processes returned exit code zero. Runtime status is OBSERVED PASS.
