@@ -106,6 +106,27 @@ halted_after
 Applying the inverse delta must restore the exact state existing before that
 instruction. Reverse-step removes the delta from trace history.
 
+DIVISION POLICY
+---------------
+
+CINDER-16 v0.1 has no division opcode. Division and divide-by-zero are therefore
+not representable architectural operations. Opcode `0xF` remains invalid and
+traps atomically; it is not an implicit DIV instruction.
+
+A future ISA revision that adds division must define both quotient semantics and
+divide-by-zero behavior before assigning an opcode.
+
+STACK POLICY
+------------
+
+CINDER-16 v0.1 has no architectural stack pointer and no PUSH, POP, CALL, or RET
+opcodes. There is therefore no hidden stack boundary behavior.
+
+Software may build a stack explicitly in ordinary memory with LD and ST. Such a
+stack is subject to the same checked `0x0000..0xffff` memory-address contract as
+all other data structures. Address wrap is never accepted by loader or debugger
+range operations.
+
 V0.1 LIMITS
 -----------
 
@@ -114,4 +135,6 @@ V0.1 LIMITS
 - No privilege levels.
 - No flags register.
 - No signed arithmetic opcodes.
+- No division opcode.
+- No architectural stack.
 - Jump targets are limited by their encoded immediate width.
